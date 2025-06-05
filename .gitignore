@@ -4,6 +4,8 @@
 .env
 .idea
 *.csv
+**/*.csv
+
 
 # virtual environments
 venv/
