@@ -287,6 +287,20 @@ def predict_customer_cluster(data: ClusterInputData):
     }
 
 
+@app.get(
+    "/api/dataset",
+    summary="Clean Dataset",
+    description="Clean Dataset after EDA.",
+    tags=["Dataset"]
+)
+def get_cleaned_data():
+    try:
+        df = pd.read_csv("data/cleaned_dataset.csv")  # Ensure correct path
+        return df.to_dict(orient="records")  # Convert DataFrame to JSON
+    except FileNotFoundError:
+        return {"error": "File not found"}
+
+
 # Run with: uvicorn app:app --reload
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
