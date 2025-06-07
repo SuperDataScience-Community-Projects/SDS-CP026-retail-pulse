@@ -11,3 +11,4 @@ streamlit>=1.45.1
 streamlit_extras>=0.7.1
 uvicorn>=0.34.3
 catboost>=1.2.8
+scikit-learn>=1.6.1

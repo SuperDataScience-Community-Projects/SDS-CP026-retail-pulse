@@ -31,9 +31,15 @@ menu = st.sidebar.radio("Go to", ["📌 Make a Prediction", "📊 View Dashboard
 # ==========================================================
 @st.cache_data
 def load_data():
-    # Replace with your actual CSV path or API call
-    cleaned_dataset = pd.read_csv("data/cleaned_dataset.csv")
-    return cleaned_dataset
+    url = base_url + "/api/dataset"
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        data = resp.json()
+        dataset = pd.DataFrame(data)
+        return dataset
+    else:
+        st.error("Failed to load dataset from API")
+        return pd.DataFrame()
 
 
 # ==========================================================
