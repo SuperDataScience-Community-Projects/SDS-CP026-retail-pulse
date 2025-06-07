@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
@@ -13,6 +14,7 @@ model_cluster = joblib.load("models/kmeans.pkl")
 scaler_returning_customer = joblib.load("models/returning_customer_scaler.pkl")
 scaler_facebook_customer = joblib.load("models/facebook_customer_scaler.pkl")
 scaler_cluster = joblib.load("models/kmeans_scaler.pkl")
+clean_dataset = joblib.load("data/cleaned_dataset.pkl")
 
 # define FastAPI app
 app = FastAPI(
@@ -295,8 +297,8 @@ def predict_customer_cluster(data: ClusterInputData):
 )
 def get_cleaned_data():
     try:
-        df = pd.read_csv("data/cleaned_dataset.csv")  # Ensure correct path
-        return df.to_dict(orient="records")  # Convert DataFrame to JSON
+        df = clean_dataset  # Load Pickle file instead of CSV
+        return df.to_dict(orient="records")  # Convert to JSON
     except FileNotFoundError:
         return {"error": "File not found"}
 
