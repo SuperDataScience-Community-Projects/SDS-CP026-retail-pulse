@@ -13,3 +13,5 @@ ENV/
 
 # Folders
 .idea/
+.data/
+data/
