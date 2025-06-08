@@ -4,6 +4,8 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 model = joblib.load('phone_customer_again.pkl')
+model_FB = joblib.load('phone_customer_FB.pkl')
+FB_influence = 0  # Initialize FB_influence
 scaler = joblib.load('scaler.pkl')
 
 st.title('Welcome to the Phone Store! :phone:')
@@ -51,11 +53,28 @@ Age, SellPrice = scaled_values[0]
 features = np.array([[Age, SellPrice, from_FB, follows_page, heard_of_shop,
        is_local, is_male] + phone_vector])
 
-# Predict
+# Button: Predict returning customer
 if st.button("Predict Returning Customer"):
+    probs = model.predict_proba(features)[0]
     prediction = model.predict(features)
-    st.write("A returning customer? →", "Yes" if prediction[0] == 1 else "No")
+    
+    # Store results in session state
+    st.session_state.returning_prob = probs[1]
+    st.session_state.returning_pred = prediction[0]
 
-#def predict_returning_customer():
+# ✅ Display results if they exist
+if "returning_pred" in st.session_state:
+    st.write(f"Probability of returning customer: {st.session_state.returning_prob * 100:.2f}%")
+    st.write("A returning customer? →", "Yes" if st.session_state.returning_pred == 1 else "No")
+    
+    # Use prediction as a feature for second model
+    FB_influence = st.session_state.returning_pred
+    features_FB = np.array([[Age, SellPrice, heard_of_shop,
+                             is_local, is_male, FB_influence] + phone_vector])
 
-#st.button('Predict returning customer', on_click=predict_returning_customer)
+    # Button: Predict Facebook influence
+    if st.button("Predict Customer Influenced by FaceBook"):
+        probs_FB = model_FB.predict_proba(features_FB)[0]
+        prediction_FB = model_FB.predict(features_FB)
+        st.write(f"Probability: {probs_FB[1]*100:.2f}%")
+        st.write("Customer influenced by FB? →", "Yes" if prediction_FB[0] == 1 else "No")
