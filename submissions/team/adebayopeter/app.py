@@ -6,7 +6,6 @@ import plotly.express as px
 import requests
 import streamlit as st
 from streamlit_extras.let_it_rain import rain
-from streamlit_lottie import st_lottie
 from datetime import datetime
 
 
