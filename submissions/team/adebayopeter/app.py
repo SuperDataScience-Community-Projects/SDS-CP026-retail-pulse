@@ -6,6 +6,7 @@ import plotly.express as px
 import requests
 import streamlit as st
 from streamlit_extras.let_it_rain import rain
+from streamlit_lottie import st_lottie
 from datetime import datetime
 
 
@@ -137,6 +138,34 @@ if menu == "📊 View Dashboards":
         fig_time = px.line(df_time, x="date", y="sell_price", title="Sales Over Time", markers=True)
         st.plotly_chart(fig_time, use_container_width=True)
 
+        st.subheader("📅 Monthly Average Sell Price Trend")
+        # Ensure the date is in datetime format
+        df_filtered['date'] = pd.to_datetime(df_filtered['date'], format='%d-%m-%Y', errors='coerce')
+
+        # Drop rows with invalid dates (if any)
+        df_filtered = df_filtered.dropna(subset=["date"])
+
+        # Group by month end and compute mean sell price
+        monthly_trend = (
+            df_filtered.set_index('date')
+            .resample('M')['sell_price']
+            .mean()
+            .reset_index()
+        )
+
+        # Plotly line chart
+        fig_monthly_trend = px.line(
+            monthly_trend,
+            x="date",
+            y="sell_price",
+            title="📈 Average Sell Price Over Time (Monthly)",
+            labels={"date": "Date", "sell_price": "Average Sell Price"},
+            markers=True
+        )
+
+        fig_monthly_trend.update_layout(xaxis_title="Month", yaxis_title="Avg Sell Price", hovermode="x unified")
+        st.plotly_chart(fig_monthly_trend, use_container_width=True)
+
         st.subheader("💰 Price Distribution by Gender")
         fig_box = px.box(
             df_filtered,
@@ -146,22 +175,6 @@ if menu == "📊 View Dashboards":
             title="Sell Price by Gender")
         st.plotly_chart(fig_box, use_container_width=True)
 
-        st.subheader("💵 Total Sales by Gender")
-        gender_sales = df_filtered.groupby("gender")["sell_price"].sum().reset_index()
-        gender_sales["gender"] = gender_sales["gender"].map({0: "Female", 1: "Male"})
-
-        fig_total = px.bar(
-            gender_sales,
-            x="gender",
-            y="sell_price",
-            color="gender",
-            labels={"sell_price": "Total Sell Price", "gender": "Gender"},
-            title="Total Sell Price by Gender",
-            text_auto=".2s"
-        )
-        st.plotly_chart(fig_total, use_container_width=True)
-        st.write(gender_sales)
-        st.write(gender_sales["gender"])
     with tab2:
         st.subheader("📦 Units Sold by Mobile Model")
         df_mobile_popularity = df_filtered["mobile_name"].value_counts().reset_index()
@@ -174,15 +187,68 @@ if menu == "📊 View Dashboards":
         )
         st.plotly_chart(fig_popularity, use_container_width=True)
 
-        st.subheader("📊 Spend Based on Purchase History")
-        fig_prev = px.box(
-            df_filtered,
-            x="did_he_she_buy_any_mobile_before",
-            y="sell_price",
-            title="Sell Price by Previous Purchase",
-            labels={"did_he_she_buy_any_mobile_before": "Bought Before (0 = No, 1 = Yes)"}
+        st.subheader("📱 Top 5 Mobile Brands by Customer Location")
+        # Get top 5 most popular mobile brands
+        top_brands = df_filtered['mobile_name'].value_counts().head(5).index.tolist()
+
+        # Filter and group data
+        top_brand_data = df_filtered[df_filtered['mobile_name'].isin(top_brands)]
+        brand_location_data = (
+            top_brand_data.groupby(['mobile_name', 'is_local'])
+            .size()
+            .reset_index(name="count")
         )
-        st.plotly_chart(fig_prev, use_container_width=True)
+
+        # Map is_local to readable values
+        brand_location_data["location_type"] = brand_location_data["is_local"].map({1: "Local", 0: "Non-local"})
+
+        # Plotly grouped bar chart
+        fig_brand_popularity = px.bar(
+            brand_location_data,
+            x="mobile_name",
+            y="count",
+            color="location_type",
+            barmode="group",
+            labels={"mobile_name": "Mobile Brand", "count": "Number of Customers", "location_type": "Location"},
+            title="Top 5 Mobile Brands by Customer Location"
+        )
+        st.plotly_chart(fig_brand_popularity, use_container_width=True)
+
+        # Assuming `avg_price_per_mobile` is already computed
+        avg_price_per_mobile = df_filtered.groupby('mobile_name')['sell_price'].mean().sort_values(ascending=False)
+        top_10_avg_price = avg_price_per_mobile.head(10).reset_index()
+        top_10_avg_price.columns = ['mobile_name', 'avg_sell_price']
+
+        st.subheader("📱 Top 10 Most Expensive Mobile Brands")
+        fig_expensive = px.line(
+            top_10_avg_price,
+            x='mobile_name',
+            y='avg_sell_price',
+            markers=True,
+            title="Top 10 Most Expensive Mobile Brands (Average Price)",
+            labels={'mobile_name': 'Mobile Brand', 'avg_sell_price': 'Average Sell Price'},
+        )
+        fig_expensive.update_traces(line=dict(color='darkorange'))
+        fig_expensive.update_layout(xaxis_tickangle=45)
+        st.plotly_chart(fig_expensive, use_container_width=True)
+
+        # Calculate top 10 most sold mobile brands
+        top_mobiles = df_filtered['mobile_name'].value_counts().head(10).reset_index()
+        top_mobiles.columns = ['mobile_name', 'sales_count']
+
+        st.subheader("📈 Top 10 Most Sold Mobile Brands")
+        # Line chart using Plotly
+        fig_top_sold = px.line(
+            top_mobiles,
+            x='mobile_name',
+            y='sales_count',
+            markers=True,
+            title="Top 10 Most Sold Mobile Brands",
+            labels={'mobile_name': 'Mobile Brand', 'sales_count': 'Number of Sales'},
+        )
+        fig_top_sold.update_traces(line=dict(color='teal'))
+        fig_top_sold.update_layout(xaxis_tickangle=45)
+        st.plotly_chart(fig_top_sold, use_container_width=True)
 
         # Sales by mobile model
         st.subheader("Sales by Mobile Model")
@@ -194,14 +260,56 @@ if menu == "📊 View Dashboards":
         st.plotly_chart(fig_model, use_container_width=True)
 
     with tab3:
+
         st.subheader("👥 Customer Age Distribution")
         fig_age = px.histogram(df_filtered, x="age", nbins=10, title="Distribution of Customer Ages")
+        st.plotly_chart(fig_age, use_container_width=True)
+
+        fig_age = px.histogram(
+            df_filtered,
+            x="age",
+            nbins=10,
+            color="gender",  # Automatically colors bars by gender
+            barmode="group",  # Shows male/female side by side per age bin
+            title="Customer Age Distribution by Gender"
+        )
         st.plotly_chart(fig_age, use_container_width=True)
 
         # Sales by gender
         st.subheader("🧑‍🤝‍🧑 Sales by Gender")
         fig_gender = px.pie(df_filtered, names="gender", values="sell_price", title="Sales by Gender")
         st.plotly_chart(fig_gender, use_container_width=True)
+
+        # Helper function to plot categorical behavior
+        def plot_behavior_plotly(df, col, title):
+            behavior_counts = df[col].value_counts().reset_index()
+            behavior_counts.columns = [col, 'count']
+
+            fig = px.bar(
+                behavior_counts,
+                x=col,
+                y='count',
+                color=col,
+                title=title,
+                labels={col: col.replace('_', ' ').capitalize(), 'count': 'Number of Customers'},
+                color_discrete_sequence=px.colors.qualitative.Set2
+            )
+            fig.update_layout(xaxis_tickangle=30)
+            return fig
+
+        st.subheader("🧠 Customer Behavioral Traits")
+
+        # Display charts
+        st.plotly_chart(
+            plot_behavior_plotly(df_filtered, 'did_he_she_buy_any_mobile_before', 'New vs. Returning Customers'),
+            use_container_width=True)
+        st.plotly_chart(
+            plot_behavior_plotly(df_filtered, 'does_he_she_come_from_facebook_page', 'Facebook-origin vs. Walk-in'),
+            use_container_width=True)
+        st.plotly_chart(plot_behavior_plotly(df_filtered, 'did_he_she_hear_of_our_shop_before', 'Referral Awareness'),
+                        use_container_width=True)
+        st.plotly_chart(plot_behavior_plotly(df_filtered, 'does_he_she_followed_our_page', 'Followed Our Facebook Page'),
+                        use_container_width=True)
 
         # Sales by Local vs Non-local
         st.subheader("Sales by Location Type")
