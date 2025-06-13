@@ -72,6 +72,7 @@ if st.button("Predict"):
         else:
             prediction_text = 'Yes' if response.text == "1" else 'No'
         st.success(f'**{prediction} : {prediction_text}**', icon='✔')
+        # Include emoji using Windows Key + . (period)
         rain(emoji='📱', font_size=50, falling_speed=5, animation_length='infinite')
     else:
         logging.error(f'Error response {response.json() if response is not None else None} for request {ui_selections}')
