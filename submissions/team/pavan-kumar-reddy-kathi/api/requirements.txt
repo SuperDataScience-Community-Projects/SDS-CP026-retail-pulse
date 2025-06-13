@@ -3,3 +3,5 @@ uvicorn~=0.34.0
 fastapi~=0.115.12
 pydantic~=2.11.2
 joblib
+scikit-learn~=1.6.1
+xgboost~=3.0.1
