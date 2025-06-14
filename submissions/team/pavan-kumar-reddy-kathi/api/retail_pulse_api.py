@@ -89,9 +89,9 @@ def predict_facebook_marketing_impact(request:FaceBookMarketingModel):
     matrix_feature = np.array([[
         request.age,
         request.sale_price,
+        request.mobile_name,
         is_local,
         is_female,
-        request.mobile_name,
         1 if request.is_facebook_page_follower else 0,
         1 if request.is_returning_customer else 0,
         1 if request.customer_already_know_about_shop else 0,
@@ -114,15 +114,15 @@ def predict_returning_customer(request:ReturningCustomerModel):
     matrix_feature = np.array([[
         request.age,
         request.sale_price,
+        request.mobile_name,
         is_local,
         is_female,
-        request.mobile_name,
         1 if request.is_from_facebook_page else 0,
         1 if request.is_facebook_page_follower else 0,
         1 if request.customer_already_know_about_shop else 0,
         sin_day_of_year,
         cos_day_of_year
-    ]])
+    ]], dtype=object)
     y_predict = returning_customer_model.predict(matrix_feature)
     return int(y_predict[0])
 

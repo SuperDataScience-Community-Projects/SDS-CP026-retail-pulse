@@ -10,14 +10,13 @@ import joblib
 from pathlib import Path
 
 pd.set_option('display.max_columns', None)
-
 # Load data set
 dataset = ds.get_data_frame(False, True)
 print(dataset.columns)
 
 # # Separate dependent and independent variables
-X = dataset.iloc[:, :-1]
-y = dataset.iloc[:, -1]
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, -1].values
 
 
 # Split data into Training and Test Set
