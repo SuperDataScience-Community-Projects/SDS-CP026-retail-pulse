@@ -7,7 +7,7 @@ from sklearn.pipeline import Pipeline
 from pathlib import Path
 import joblib
 
-
+# Clustering model, with 4 clusters
 pd.set_option('display.max_columns',None)
 
 # Load data set

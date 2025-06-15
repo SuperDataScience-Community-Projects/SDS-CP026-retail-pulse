@@ -1,6 +1,6 @@
 import calendar
 from pydantic import BaseModel
-from datetime import date, datetime
+from datetime import date
 from enums import Location, Gender, MobileName
 import joblib
 import numpy as np
@@ -26,6 +26,9 @@ cluster_names = {
 }
 
 class MobilePurchaseInfo(BaseModel):
+    """
+    Base Model that captures purchase information of a mobile
+    """
     purchase_date:date
     location:Location
     age:int
@@ -36,23 +39,33 @@ class MobilePurchaseInfo(BaseModel):
     customer_already_know_about_shop:bool
 
 class FaceBookMarketingModel(MobilePurchaseInfo):
+    """
+    Input payload used in predicting impact of facebook marketing on mobile purchase
+    """
     is_returning_customer:bool
 
 class ReturningCustomerModel(MobilePurchaseInfo):
+    """
+    Input payload used in predicting whether buyer is returning customer or not
+    """
     is_from_facebook_page:bool
 
 class ClusteringModel(MobilePurchaseInfo):
+    """
+    Input payload used in predicting cluster for buyer
+    """
     is_from_facebook_page: bool
     is_returning_customer: bool
 
 
 def get_sine_cosine_transformations(input_date:date):
     """
-
-    :param input_date:
-    :return:
+    Extracts day of year from input date and applies sin and cos transformations,
+    and returns the corresponding values as output
+    :param input_date: Input date object
+    :return: sin and cos values obtained after applying sin and cos transformations on day of year
+    extracted from input date
     """
-    # date_object = datetime.fromisoformat(input_date).date()
     day_of_year = input_date.timetuple().tm_yday
     days_in_year = 365 + calendar.isleap(input_date.year)
     sin_day_of_year = np.sin(2 * np.pi * day_of_year / days_in_year)
@@ -62,17 +75,17 @@ def get_sine_cosine_transformations(input_date:date):
 
 def is_local_customer(location:Location)->int:
     """
-
-    :param location:
-    :return:
+    Extract Local Vs Non-Local information from input Location enum
+    :param location: Instance of Location enum
+    :return: 0 if location is Outside Rangamati else 1
     """
     return 0 if location == Location.Outside_Rangamati else 1
 
 def is_female_customer(gender:Gender)->int:
     """
-
-    :param gender:
-    :return:
+    Extract male Vs female information from input Gender enum
+    :param gender: Instance of Gender enum
+    :return: 1 if gender is female else 0
     """
     return 1 if gender == Gender.Female else 0
 
@@ -82,7 +95,14 @@ def is_female_customer(gender:Gender)->int:
     description='Predicts impact of facebook marketing based on input mobile purchase information',
     tags=["Prediction"]
 )
-def predict_facebook_marketing_impact(request:FaceBookMarketingModel):
+def predict_facebook_marketing_impact(request:FaceBookMarketingModel)->int:
+    """
+    API endpoint for predicting the impact of facebook marketing on
+    input mobile purchase transaction
+    :param request: Instance of FaceBookMarketingModel
+    :return: 1 , if model predicts that input mobile purchase is originated from facebook
+    else 0
+    """
     is_local = is_local_customer(request.location)
     sin_day_of_year, cos_day_of_year = get_sine_cosine_transformations(request.purchase_date)
     is_female = is_female_customer(request.gender)
@@ -107,7 +127,14 @@ def predict_facebook_marketing_impact(request:FaceBookMarketingModel):
     description='Predicts whether customer is retuning customer or not based on input mobile purchase information',
     tags=["Prediction"]
 )
-def predict_returning_customer(request:ReturningCustomerModel):
+def predict_returning_customer(request:ReturningCustomerModel)->int:
+    """
+    API endpoint for predicting whether the input mobile purchase transaction is done
+    by returning customer or not
+    :param request: Instance of ReturningCustomerModel
+    :return: 1 , if model predicts that input mobile purchase is done by returning customer
+    else 0
+    """
     is_local = is_local_customer(request.location)
     sin_day_of_year, cos_day_of_year = get_sine_cosine_transformations(request.purchase_date)
     is_female = is_female_customer(request.gender)
@@ -132,7 +159,12 @@ def predict_returning_customer(request:ReturningCustomerModel):
     description='Predicts the cluster to which input customer belongs to',
     tags=["Prediction"]
 )
-def predict_customer_cluster(request:ClusteringModel):
+def predict_customer_cluster(request:ClusteringModel)->str:
+    """
+    API endpoint that Predicts the cluster to which input customer belongs to
+    :param request: Instance of ClusteringModel
+    :return: string representing cluster name to which input customer belongs to
+    """
     is_local = is_local_customer(request.location)
     sin_day_of_year, cos_day_of_year = get_sine_cosine_transformations(request.purchase_date)
     is_female = is_female_customer(request.gender)

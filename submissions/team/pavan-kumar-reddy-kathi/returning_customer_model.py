@@ -9,6 +9,7 @@ from xgboost import XGBClassifier
 import joblib
 from pathlib import Path
 
+# Final prediction model for Returning Customer, after hyper parameter tuning
 pd.set_option('display.max_columns', None)
 # Load data set
 dataset = ds.get_data_frame(False, True)
@@ -18,12 +19,10 @@ print(dataset.columns)
 X = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, -1].values
 
-
 # Split data into Training and Test Set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, stratify=y)
 print(len(y[y == 0]))
 print(len(y[y == 1]))
-
 
 # Apply Standard/Robust Scaling/one hot encoding
 standard_scaling_features = [0] # Age

@@ -9,6 +9,7 @@ from catboost import CatBoostClassifier
 import joblib
 from pathlib import Path
 
+# Final prediction model for facebook marketing, after hyper parameter tuning
 pd.set_option('display.max_columns', None)
 
 # Load data set

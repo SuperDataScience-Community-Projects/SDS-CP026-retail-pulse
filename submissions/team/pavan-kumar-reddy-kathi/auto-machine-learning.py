@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 from flaml import AutoML
 from sklearn.metrics import accuracy_score
 
+# Try out AutoML, to see if it can provide better accuracy over 65%
 pd.set_option('display.max_columns',None)
 
 # Load data set
@@ -34,7 +35,7 @@ preprocessor = ColumnTransformer([('onehotencoder', OneHotEncoder(handle_unknown
 pipeline = Pipeline([('preprocessor', preprocessor)])
 # print(X_train)
 X_train_transformed = pipeline.fit_transform(X_train)
-X_test_transformed = pipeline.fit_transform(X_test)
+X_test_transformed = pipeline.transform(X_test)
 
 automl = AutoML()
 automl_settings = {

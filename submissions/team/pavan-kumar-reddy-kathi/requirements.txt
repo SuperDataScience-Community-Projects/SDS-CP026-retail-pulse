@@ -19,3 +19,4 @@ requests~=2.32.3
 python-dotenv~=1.1.0
 plotly~=6.0.1
 imbalanced-learn~=0.13.0
+streamlit_extras
