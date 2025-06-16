@@ -13,18 +13,18 @@ Link to Dataset: https://www.kaggle.com/datasets/shohinurpervezshohan/techcorner
 
 ## Project Structure
 
-| Folder/File Name   | Description                                                                |
-|---------------|----------------------------------------------------------------------------|
-| api           | Contains FASTAPI code that host final machine learning models as rest api  |
-| data_analysis | Contains ipynb files with EDA and cluster analysis            |
-| frontend      | Streamlit application the enables end users to try out these models via Fast API        |
-| auto-machine-learning.py | Contains experimenation code with AutoML for Facebook marketing model                |
-| dataset_module.py          | Contains code to load dataset from csv file, along with few reusable transformations        |
-| facebook_marketing_model.py    | Contains Final prediction model (CatBoost) implementation for facebook marketing       |
-| kmeans_clustering.py      | Contains KMeans Model implementation with four clusters          |
-| optuna_hyper_parameter_tuning.ipynb        | Contains hyper parameter tuning code for various machine learning models using optuna  |
-| returning_customer_model.py    | Contains Final prediction model (XgBoost) implementation for returning customers       |
-| TechCorner_Sales_update.csv    | Dataset containing sales information for mobiles       |
+| Folder/File Name                    | Description                                                                           |
+|-------------------------------------|---------------------------------------------------------------------------------------|
+| api                                 | Contains FASTAPI code that host final machine learning models as rest api             |
+| data_analysis                       | Contains ipynb files with EDA and cluster analysis                                    |
+| frontend                            | Streamlit application the enables end users to try out these models via Fast API      |
+| auto-machine-learning.py            | Contains experimenation code with AutoML for Facebook marketing model                 |
+| dataset_module.py                   | Contains code to load dataset from csv file, along with few reusable transformations  |
+| facebook_marketing_model.py         | Contains Final prediction model (CatBoost) implementation for facebook marketing      |
+| kmeans_clustering.py                | Contains KMeans Model implementation with four clusters                               |
+| optuna_hyper_parameter_tuning.ipynb | Contains hyper parameter tuning code for various machine learning models using optuna |
+| returning_customer_model.py         | Contains Final prediction model (XgBoost) implementation for returning customers      |
+| TechCorner_Sales_update.csv         | Dataset containing sales information for mobiles                                      |
 
 ## Installation
 * If you are looking to install and run, all applications and modules then perform below steps. 
@@ -39,66 +39,66 @@ Link to Dataset: https://www.kaggle.com/datasets/shohinurpervezshohan/techcorner
 ## Dataset
 Source to Dataset: https://www.kaggle.com/datasets/shohinurpervezshohan/techcorner-mobile-purchase-and-engagement-data
 
-| Column Name   | Description                                                                                             |
-|---------------|---------------------------------------------------------------------------------------------------------|
-| Cus.ID           | Customer Id                  |
-| Date         | Mobile Purchase date                               |
-| Cus. Location       | Customer Location |
-| Age         | Customer Age                                                                     |
-| Gender         | Customer Gender                                                               |
-| Mobile Name         | Mobile Name/Model                |
-| Sell Price         | Purchase Price of Mobile                                                                              |
-| Does he/she Come from Facebook Page?   | Target variable that indicates whether purchase is originated from Facebook |
-| Does he/she Followed Our Page? | Indicates whether customer is follower of Mobile shop Facebook page |
+| Column Name                            | Description                                                                                 |
+|----------------------------------------|---------------------------------------------------------------------------------------------|
+| Cus.ID                                 | Customer Id                                                                                 |
+| Date                                   | Mobile Purchase date                                                                        |
+| Cus. Location                          | Customer Location                                                                           |
+| Age                                    | Customer Age                                                                                |
+| Gender                                 | Customer Gender                                                                             |
+| Mobile Name                            | Mobile Name/Model                                                                           |
+| Sell Price                             | Purchase Price of Mobile                                                                    |
+| Does he/she Come from Facebook Page?   | Target variable that indicates whether purchase is originated from Facebook                 |
+| Does he/she Followed Our Page?         | Indicates whether customer is follower of Mobile shop Facebook page                         |
 | Did he/she buy any mobile before?      | Target Variable that indicates whether customer is returning customer or brand new customer |
-| Did he/she hear of our shop before?      | Indicates whether customer is already aware about mobile shop |
+| Did he/she hear of our shop before?    | Indicates whether customer is already aware about mobile shop or not                        |
 
 ## Exploratory Data Analysis
-* Though there is no missing(na/null/nan) data present in dataset, it is observed that there are few rows (around 20) with zero width, zero length, zero height. These rows are removed as these are just around 20 in count and there is no possibility of diamond being present  with zero value for width, length, height.
-* An attempt is made to come up with derived feature Volume as multiplication of length, width and height of diamond, but that didn't result in improvement of model performance significantly.
-* It is identified that there is not much linear relationship between dependent variables and target variable and hence not much weightage is given to linear regression models.
-* carat,price,x (Premium),z (Very Good),y (Good) columns are highly correlated with each other. Refer correlation plots under **docs** folder.  
-* Though outliers are observed, no attempt is made either to cap them or remove them, as there is no business knowledge around these outliers to find whether these are genuine or entered by mistake/error entry
+* There is no missing data present in dataset
+* Though outliers are observed (Sell Price Column), no attempt is made either to cap them or remove them, as there is no business knowledge around these outliers to find whether these are genuine or entered by mistake/error entry. **RobustScaler** is used for scaling purpose as it is less sensitive to outliers. There also an option to apply **boxcox** transformation on **Sell Price** Column to reduce skew from 6.06 to 0.02
+* This dataset is moderately imbalanced, especially in case of target variables (Did he/she buy any mobile before? & Does he/she Come from Facebook Page?) where we can observe class label **No** is around 3 times as that of **Yes**
+* **Chi-Square Test** is performed to understand relation between dependent and independent categorical variables.As all of the P values are > 0.05, There is no strong association or dependency between categorical features and target variables(Did he/she buy any mobile before? & Does he/she Come from Facebook Page?)
+* Detailed Analysis results of EDA can be found at [EDA](data-analysis/retail_pulse_data_analysis.ipynb) .
 
-| Attribute | Number of Outliers | Percentage | Skew  |
-|-----------|--------------------|------------|-------|
-| price     | 3532               | 6.55       | 1.62  |
-| carat     | 1883               | 3.49       | 1.12  |
-| depth     | 2543               | 4.72       | -0.08 |
-| table     | 604                | 1.12       | 0.8   |
-| width     | 24                 | 0.04       | 0.4   |
-| height    | 29                 | 0.05       | 1.58  |
-| length    | 22                 | 0.04       | 2.46  |
+## Cluster Analysis
+* Sale Price seems to be  primary differentiating factor and Age is secondary differentiating factor between clusters.
+* Total four clusters are suggested by Elbow method. Please note that cluster ids indicated below may vary across runs.
+* Clusters 0 & 2 got same price range(12k-35k), and the differentiating factor between these clusters is age. cluster 2(**Budget-Conscious Youngsters**) got age range from 18-34 where as age range in cluster 0(**Practical Professionals**) is 34-50.
+* Cluster 1 got high price range(**Elite Tech Aficionados**), cluster 3 (**Ambitious Tech Enthusiasts**) got medium price range, where as clusters 0 and 2 got starting price range.
+* Detailed Analysis results of Clusters can be found at [Clusters](data-analysis/kmeans_clustering_and_analysis.ipynb)
 
-## Models
+## Models & Hyper Parameter Tuning
 * 20% of dataset is used to test models
-* Almost all available regression models are evaluated to identify how they are performing against dataset. R2 Score and RMSE metrics are calculated to evaluate models.Cross validation is performed for 10 splits and average R2 Score and RMSE metrics calculated for both test and train data to ensure better generalization of model. All these metrics are available as json files under Model\GridSearchCV\Untuned folder.
-* Out of all evaluated models **CatBoost Regressor** outperformed other models with better R2 score and with minimal difference in RMSE between Train and Test data.
-* Hyperparameter tuning is performed for top 2 (in terms of R2 score and RMSE metrics) regression models CatBoost & LightGBM by making use of **optuna**, unfortunately no further improvement in performance is observed for these two regression models.
-* Tried out Artificial Neural Networks as well, but unfortunately unable to proceed further with cross validation as it was resulting in an error.
+* Almost all Major classification models are evaluated to identify how they are performing against dataset.
+* As Dataset is Imbalanced priority is given to F1 score. Hyper Parameter tuning is done (using optuna) to identify parameter values corresponding to maximum F1 score. These parameter values are used to get corresponding accuracy for these models.
+* As this is imabalanced data set, we used StratifiedKFold validation, to preserve same class distribution as that of full dataset.
+* Out of all evaluated models **CatBoostClassifier** outperformed other models with accuracy score of 0.5166 and F1 score of 0.4257 while predicting target variable Does he/she Come from Facebook Page?.
+* In case of Returning Customer Prediction (Did he/she buy any mobile before?) **XGBClassifier** outperformed other models with accuracy score of 0.5357 and F1 score of 0.3651
+* Additional efforts are made (with not much success) to improve F1 score and accuracy by
+    * Stacking top performing models using **StackingClassifier**
+    * Varying probability thresholds between 0.5 to 0.6
+    * Playing around with SMOTE and Under Sampling methods
+    * Making use of [AutoML](auto-machine-learning.py)
+* Hyper Parameter Tuning code can be found at [Tuning](optuna_hyper_parameter_tuning.ipynb)   
 
-## Model Performance Metrics
-| Regression Model      | R2_Test_Mean | R2_Train_Mean | RMSE_Test_Mean | RMSE_Train_Mean |
-|-----------------------|--------------|---------------|----------------|-----------------|
-| AdaBoostRegressor     | 0.9147       | 0.9159        | 1163.8         | 1156.18         |
-| CatBoostRegressor     | 0.9829       | 0.9876        | 520.58         | 442.73          |
-| DecisionTreeRegressor | 0.9657       | 0.9999        | 737.73         | 6.86            |
-| ElasticNet            | 0.845        | 0.8453        | 1570.62        | 1569.65         |
-| KNeighborsRegressor   | 0.9715       | 0.9999        | 673.24         | 6.78            |
-| Lasso                 | 0.9012       | 0.9058        | 1251.09        | 1224.68         |
-| LGBMRegressor         | 0.982        | 0.9864        | 533.19         | 465.03          |
-| LinearRegression      | 0.9013       | 0.9058        | 1249.67        | 1224.65         |
-| LinearSVR             | 0.8677       | 0.8677        | 1451.31        | 1451.43         |
-| PolynomialFeatures    | 0.8947       | 0.9058        | 1282.81        | 1224.46         |
-| RandomForestRegressor | 0.9815       | 0.9974        | 542.21         | 202.71          |
-| Ridge                 | 0.9008       | 0.9058        | 1254.83        | 1224.67         |
-| XGBRegressor          | 0.9812       | 0.9907        | 546.09         | 383.27          |
+## Model Performance Metrics (Returning Customer Prediction Model)
+| Classification Model    | F1 score     | Accuracy Score |
+|-------------------------|--------------|----------------|
+| XGBClassifier           | 0.3451       | 0.5114         |
+| LogisticRegression      | 0.3540       | 0.4339         |
+| KNeighborsClassifier    | 0.1537       | 0.6957         |
+| LinearSVC               | 0.3422       | 0.5146         |
+| SVC                     | 0.3965       | 0.2473         |
+| RandomForestClassifier  | 0.3506       | 0.4732         |
+| DecisionTreeClassifier  | 0.3965       | 0.2473         |
+| LGBMClassifier          | 0.3347       | 0.5287         |
+| CatBoostClassifier      | 0.3471       | 0.5119         |
 
 ## Usage
-* After setting up of FastAPI and StreamLit applications you can evaluate model performance by entering Diamond features and trying to predict Price for those input features.
-* You can test FastAPI and StreamLit applications at below urls as well.
-    * FastAPI-https://sds-cp023-diamond-price-predictor-bfar.onrender.com/docs
-    * Streamlit App - https://sds-cp023-diamond-price-predictor-ui.onrender.com/
+* After setting up of FastAPI and StreamLit applications you can evaluate model performance by entering Mobile Purchase information and trying to predict target variables or cluster information.
+* You can test FastAPI and StreamLit applications at below urls as well. Please note that as deployment account is Free account it may take few minutes to load these Urls. 
+    * FastAPI - https://sds-cp026-retail-pulse-4clt.onrender.com/docs
+    * Streamlit App - https://sds-cp026-retail-pulse-ui.onrender.com/
 
 ## Contact Information
 https://www.linkedin.com/in/pavan-kumar-reddy-kathi-203563154/
