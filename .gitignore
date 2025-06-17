@@ -13,6 +13,8 @@ ENV/
 
 # Folders
 .idea/
+.data/
+data/
 /submissions/team/pavan-kumar-reddy-kathi/__pycache__
 /submissions/team/pavan-kumar-reddy-kathi/api/__pycache__
 /submissions/team/pavan-kumar-reddy-kathi/catboost_info
